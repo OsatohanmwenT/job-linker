@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED=1
 
 # ------------ Install System Dependencies ------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential gcc libpq-dev \
+    build-essential gcc g++ gfortran libpq-dev \
+    libopenblas-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # ------------ Create App Directory ------------
@@ -24,4 +25,4 @@ COPY . .
 EXPOSE 8000
 
 # ------------ Run Server ------------
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,25 +1,19 @@
 "use client";
 
 import AuthForm from "@/components/auth/AuthForm";
-import { loginSchema, LoginSchema } from "@/lib/schemas";
+import { LoginSchema, LoginSchemaType } from "@/lib/schemas/auth";
+import { loginUser } from "@/lib/actions/auth";
 
 export default function LoginPage() {
-  const handleLogin = async (data: LoginSchema) => {
-    // Mock login logic for MVP
-    console.log("Login attempt:", data);
+  const handleLogin = async (data: LoginSchemaType) => {
+    const result = await loginUser(data);
+    console.log("wotkinh", result);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock success
-    return {
-      success: true,
-      user: { email: data.email, role: "SEEKER" }, // Mock user
-      tokens: {
-        accessToken: "mock_access_token",
-        refreshToken: "mock_refresh_token",
-      },
-    };
+    if (result.success) {
+      return result;
+    } else {
+      return result;
+    }
   };
 
   return (
@@ -31,7 +25,7 @@ export default function LoginPage() {
         </div>
         <AuthForm
           type="SIGN_IN"
-          schema={loginSchema}
+          schema={LoginSchema}
           defaultValues={{ email: "", password: "" }}
           onSubmit={handleLogin}
         />

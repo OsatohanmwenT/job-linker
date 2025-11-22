@@ -1,7 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-export const CONFIG = {
-    API_BASE_URL: process.env.API_BASE_URL,
-    API_KEY: process.env.API_KEY,
-}
+export const APP_CONFIG = {
+  API_URL:
+    typeof window === "undefined"
+      ? process.env.INTERNAL_API_URL || "http://backend:8000/api/v1"
+      : process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1",
+};

@@ -4,3 +4,10 @@ scikit-learn
 pydantic
 python-multipart
 pymupdf
+sqlalchemy
+psycopg2-binary
+passlib[bcrypt]
+python-jose[cryptography]
+email-validator
+pydantic-settings
+httpx

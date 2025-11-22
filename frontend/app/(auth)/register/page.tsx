@@ -1,26 +1,21 @@
 "use client";
 
 import AuthForm from "@/components/auth/AuthForm";
-import { registerSchema, RegisterSchema } from "@/lib/schemas";
+import { RegisterSchema, RegisterSchemaType } from "@/lib/schemas/auth";
 import { ROLES } from "@/constants";
+import { registerUser } from "@/lib/actions/auth";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const handleRegister = async (data: RegisterSchema) => {
-    // Mock registration logic for MVP
-    console.log("Register attempt:", data);
+  const handleRegister = async (data: RegisterSchemaType) => {
+    const result = await registerUser(data);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock success
-    return {
-      success: true,
-      user: { email: data.email, role: data.role, fullName: data.fullName },
-      tokens: {
-        accessToken: "mock_access_token",
-        refreshToken: "mock_refresh_token",
-      },
-    };
+    if (result.success) {
+      return result;
+    } else {
+      toast.error(result.error || "Registration failed");
+      return result;
+    }
   };
 
   return (
@@ -32,7 +27,7 @@ export default function RegisterPage() {
         </div>
         <AuthForm
           type="SIGN_UP"
-          schema={registerSchema}
+          schema={RegisterSchema}
           defaultValues={{
             fullName: "",
             email: "",
