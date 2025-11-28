@@ -3,10 +3,6 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Load environment variables first
-load_dotenv()
-
-# Import other modules
 from app.api.routes import (
     applications_router,
     auth_router,
@@ -18,13 +14,18 @@ from app.api.routes import (
     saved_jobs_router,
     skills_router,
 )
-
-# Import inngest_client
 from app.config import settings
 from app.core.background.inngest_client import inngest_client
 from app.core.background.jobs.applicant_ranking_job import rank_applicant_job
 from app.core.background.jobs.resume_job import parse_resume_job
 from app.db import init_db
+
+# Load environment variables first
+load_dotenv()
+
+# Import other modules
+
+# Import inngest_client
 
 
 async def lifespan(app: FastAPI):
