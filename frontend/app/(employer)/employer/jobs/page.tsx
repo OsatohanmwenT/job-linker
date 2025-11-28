@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,23 +26,54 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Plus, Pencil, Trash2, Eye, Users } from "lucide-react";
+import {
+  MoreHorizontal,
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  Users,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { JobListing } from "@/types/jobListing";
 import { formatRelativeTime } from "@/lib/formatters";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { organizationService } from "@/services/organizationService";
+import { jobService } from "@/services/jobService";
 
 export default function EmployerJobsPage() {
-  const router = useRouter();
-
-  // Dummy data for testing UI
   const [jobs, setJobs] = useState<JobListing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        // First get the organization
+        const orgs = await organizationService.getMyOrganizations();
+        if (orgs.length > 0) {
+          // Then fetch jobs for that organization
+          const orgJobs = await jobService.getOrganizationJobListings(
+            orgs[0].id
+          );
+          setJobs(orgJobs);
+        }
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+        toast.error("Failed to load job listings");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this job listing?")) return;
 
     try {
+      await jobService.deleteJobListing(id);
       setJobs(jobs.filter((job) => job.id !== id));
       toast.success("Job listing deleted");
     } catch (error) {
@@ -50,6 +81,14 @@ export default function EmployerJobsPage() {
       toast.error("Failed to delete job listing");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -79,7 +118,7 @@ export default function EmployerJobsPage() {
           {jobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-muted-foreground mb-4">
-                You haven't posted any jobs yet.
+                You haven&apos;t posted any jobs yet.
               </p>
               <Button variant="outline" asChild>
                 <Link href="/employer/jobs/new">Create your first job</Link>
