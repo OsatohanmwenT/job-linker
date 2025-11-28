@@ -1,6 +1,5 @@
 import { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
-import { TSuccessResponse } from "@/types";
 
 type BaseServiceConfig = {
   params?: Record<string, unknown>;
@@ -18,14 +17,16 @@ export abstract class BaseService {
   }
 
   protected async handleRequest<TData>(
-    request: Promise<AxiosResponse<TSuccessResponse<TData>>>
+    request: Promise<AxiosResponse<TData>>
   ): Promise<TData> {
     try {
       const response = await request;
-      return response.data.data;
+      return response.data;
     } catch (e) {
       if (e instanceof AxiosError) {
-        throw new Error(e.response?.data?.message || e.message);
+        throw new Error(
+          e.response?.data?.detail || e.response?.data?.message || e.message
+        );
       }
       throw new Error("Something went wrong while processing your request");
     }
@@ -57,6 +58,14 @@ export abstract class BaseService {
     config?: BaseServiceConfig
   ): Promise<TResponse> {
     return this.handleRequest(this.apiInstance.put(url, data, config));
+  }
+
+  public async patch<TResponse, TData>(
+    url: string,
+    data: TData,
+    config?: BaseServiceConfig
+  ): Promise<TResponse> {
+    return this.handleRequest(this.apiInstance.patch(url, data, config));
   }
 
   public async delete<TData>(

@@ -37,14 +37,6 @@ export const RegisterSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     ),
-  phone: z
-    .string()
-    .min(10, "Phone number must be at least 10 characters")
-    .max(50, "Phone number must not exceed 50 characters")
-    .optional(),
-  role: z.enum(["SEEKER", "EMPLOYER"], {
-    message: "Role must be SEEKER or EMPLOYER",
-  }),
 });
 
 export type LoginSchemaType = z.infer<typeof LoginSchema>;

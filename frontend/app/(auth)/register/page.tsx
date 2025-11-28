@@ -1,13 +1,19 @@
 "use client";
 
+import { useCallback } from "react";
 import AuthForm from "@/components/auth/AuthForm";
 import { RegisterSchema, RegisterSchemaType } from "@/lib/schemas/auth";
-import { ROLES } from "@/constants";
 import { registerUser } from "@/lib/actions/auth";
 import { toast } from "sonner";
 
+const defaultValues = {
+  fullName: "",
+  email: "",
+  password: "",
+};
+
 export default function RegisterPage() {
-  const handleRegister = async (data: RegisterSchemaType) => {
+  const handleRegister = useCallback(async (data: RegisterSchemaType) => {
     const result = await registerUser(data);
 
     if (result.success) {
@@ -16,7 +22,7 @@ export default function RegisterPage() {
       toast.error(result.error || "Registration failed");
       return result;
     }
-  };
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -28,14 +34,8 @@ export default function RegisterPage() {
         <AuthForm
           type="SIGN_UP"
           schema={RegisterSchema}
-          defaultValues={{
-            fullName: "",
-            email: "",
-            phone: "",
-            role: ROLES.SEEKER,
-            password: "",
-          }}
-          onSubmit={handleRegister}
+          defaultValues={defaultValues}
+          onSubmit={handleRegister as any}
         />
       </div>
     </main>

@@ -12,7 +12,7 @@ export const loginUser = async ({
   success: boolean;
   error?: string;
   user?: User;
-  tokens?: { accessToken: string; refreshToken: string };
+  tokens?: { accessToken: string; refreshToken?: string };
 }> => {
   try {
     const response = await authService.login({ email, password });
@@ -52,10 +52,33 @@ export const loginUser = async ({
 
 export const registerUser = async (data: SignUpRequest) => {
   try {
-    await authService.signUp(data);
+    // Transform frontend data to match backend schema
+    const backendData = {
+      email: data.email,
+      password: data.password,
+      name: data.fullName, // Map fullName to name
+    };
+
+    const response = await authService.signUp(backendData);
+
+    // Store tokens if returned
+    if (response.accessToken) {
+      await TokenStorage.setAccessToken(response.accessToken);
+    }
+    if (response.refreshToken) {
+      await TokenStorage.setRefreshToken(response.refreshToken);
+    }
+    if (response.user) {
+      await TokenStorage.setUser(response.user);
+    }
 
     return {
       success: true,
+      user: response.user,
+      tokens: {
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      },
     };
   } catch (error: any) {
     console.error("Registration error:", error);

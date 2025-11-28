@@ -1,9 +1,9 @@
 import {
   AuthResponseData,
+  BackendLoginRequest,
+  BackendRegisterRequest,
   GetProfileResponse,
   LogoutResponseData,
-  SignInRequest,
-  SignUpRequest,
 } from "@/types/auth";
 import { BaseService } from "./baseService";
 
@@ -12,12 +12,15 @@ class AuthService extends BaseService {
     super("auth");
   }
 
-  async login(data: SignInRequest): Promise<AuthResponseData> {
-    return this.post<AuthResponseData, SignInRequest>("/login", data);
+  async login(data: BackendLoginRequest): Promise<AuthResponseData> {
+    return this.post<AuthResponseData, BackendLoginRequest>("/login", data);
   }
 
-  async signUp(data: SignUpRequest): Promise<AuthResponseData> {
-    return this.post<AuthResponseData, SignUpRequest>("/register", data);
+  async signUp(data: BackendRegisterRequest): Promise<AuthResponseData> {
+    return this.post<AuthResponseData, BackendRegisterRequest>(
+      "/register",
+      data
+    );
   }
 
   async logout(): Promise<LogoutResponseData> {

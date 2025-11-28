@@ -4,8 +4,8 @@ import { refreshService } from "@/services/refreshService";
 
 const PUBLIC_ROUTES = new Set([
   "/",
-  "/sign-in",
-  "/sign-up",
+  "/login",
+  "/register",
   "/forget-password",
   "/reset-password",
 ]);
@@ -48,7 +48,7 @@ export async function proxy(request: NextRequest) {
 
   if (!accessToken && !refreshToken) {
     const url = request.nextUrl.clone();
-    url.pathname = "/sign-in";
+    url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
@@ -98,7 +98,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone();
-  url.pathname = "/sign-in";
+  url.pathname = "/login";
   url.searchParams.set("redirect", pathname);
 
   const response = NextResponse.redirect(url);

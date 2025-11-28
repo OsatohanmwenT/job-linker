@@ -1,13 +1,14 @@
 fastapi
-uvicorn
-scikit-learn
-pydantic
-python-multipart
-pymupdf
+uvicorn[standard]
 sqlalchemy
-psycopg2-binary
-passlib[bcrypt]
+pydantic[email]
+bcrypt
 python-jose[cryptography]
-email-validator
-pydantic-settings
-httpx
+python-multipart
+psycopg2-binary
+python-dotenv
+inngest
+# anthropic
+google-generativeai
+pypdf2
+python-docx

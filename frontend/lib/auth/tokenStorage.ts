@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import { TOKEN_KEYS, COOKIE_OPTIONS } from "./tokenKeys";
 
 /**
@@ -11,6 +10,7 @@ export async function setAccessToken(token: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(TOKEN_KEYS.ACCESS_TOKEN, token, {
     ...COOKIE_OPTIONS,
+    httpOnly: false, // Allow client-side access for API calls
     maxAge: 60 * 15, // 15 minutes
   });
 }
@@ -43,6 +43,17 @@ export async function getRefreshToken(): Promise<string | null> {
 }
 
 /**
+ * Store both access and refresh tokens
+ */
+export async function setTokens(
+  accessToken: string,
+  refreshToken: string
+): Promise<void> {
+  await setAccessToken(accessToken);
+  await setRefreshToken(refreshToken);
+}
+
+/**
  * Store user data
  */
 export async function setUser(user: any): Promise<void> {
@@ -61,17 +72,6 @@ export async function getUser(): Promise<any | null> {
   const cookieStore = await cookies();
   const user = cookieStore.get(TOKEN_KEYS.USER)?.value;
   return user ? JSON.parse(user) : null;
-}
-
-/**
- * Store both tokens at once
- */
-export async function setTokens(
-  access_token: string,
-  refresh_token: string
-): Promise<void> {
-  await setAccessToken(access_token);
-  await setRefreshToken(refresh_token);
 }
 
 /**

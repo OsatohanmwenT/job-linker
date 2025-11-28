@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FormControl } from "@/components/ui/form";
 import {
   ControllerFieldState,
   ControllerRenderProps,
@@ -22,21 +23,19 @@ interface RoleDropdownProps<T extends FieldValues> {
 
 const RoleDropdown = <T extends FieldValues>({
   field,
-  fieldState,
   roles,
 }: RoleDropdownProps<T>) => {
   return (
     <Select
-      {...field}
       onValueChange={field.onChange}
       defaultValue={field.value}
+      value={field.value}
     >
-      <SelectTrigger
-        className="w-[180px] shadow-none h-auto rounded-sm"
-        aria-invalid={fieldState.invalid}
-      >
-        <SelectValue placeholder="Select a role" />
-      </SelectTrigger>
+      <FormControl>
+        <SelectTrigger className="w-[180px] shadow-none h-auto rounded-sm">
+          <SelectValue placeholder="Select a role" />
+        </SelectTrigger>
+      </FormControl>
       <SelectContent className="font-mono">
         {roles.map((role) => (
           <SelectItem key={role} value={role}>

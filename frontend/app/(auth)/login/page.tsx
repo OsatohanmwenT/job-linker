@@ -1,20 +1,22 @@
 "use client";
 
+import { useCallback } from "react";
 import AuthForm from "@/components/auth/AuthForm";
 import { LoginSchema, LoginSchemaType } from "@/lib/schemas/auth";
 import { loginUser } from "@/lib/actions/auth";
 
+const defaultValues = { email: "", password: "" };
+
 export default function LoginPage() {
-  const handleLogin = async (data: LoginSchemaType) => {
+  const handleLogin = useCallback(async (data: LoginSchemaType) => {
     const result = await loginUser(data);
-    console.log("wotkinh", result);
 
     if (result.success) {
       return result;
     } else {
       return result;
     }
-  };
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -26,8 +28,8 @@ export default function LoginPage() {
         <AuthForm
           type="SIGN_IN"
           schema={LoginSchema}
-          defaultValues={{ email: "", password: "" }}
-          onSubmit={handleLogin}
+          defaultValues={defaultValues}
+          onSubmit={handleLogin as any}
         />
       </div>
     </main>

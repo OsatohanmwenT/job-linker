@@ -1,42 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
-import { ZodType } from "zod";
+import React, { useCallback } from "react";
+import { ZodSchema } from "zod";
 import {
-  Controller,
   DefaultValues,
   FieldValues,
-  Path,
   useForm,
   UseFormReturn,
 } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import PasswordInput from "./PasswordInput";
-import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import * as TokenStorage from "@/lib/auth/tokenStorage";
-import RoleDropdown from "./RoleDropdown";
-import { ROLES } from "@/constants";
+import { LoadingSwap } from "@/components/LoadingSwap";
+import { User } from "@/types/auth";
 
 interface AuthFormProps<T extends FieldValues> {
   type: "SIGN_IN" | "SIGN_UP";
-  schema: ZodType<T, any>;
+  schema: ZodSchema<T>;
   onSubmit?: (data: T) => Promise<{
     success: boolean;
     message?: string;
     error?: string;
-    user?: any;
+    user?: User;
     tokens?: { accessToken: string; refreshToken: string };
   }>;
   defaultValues: DefaultValues<T>;
@@ -48,46 +46,46 @@ const AuthForm = <T extends FieldValues>({
   onSubmit,
   defaultValues,
 }: AuthFormProps<T>) => {
-  const [isLoading, setIsLoading] = useState(false);
   const isSignIn = type === "SIGN_IN";
-  const router = useRouter();
 
-  const form: UseFormReturn<T> = useForm({
-    resolver: zodResolver(schema),
+  const form = useForm({
+    resolver: zodResolver(schema as any),
     defaultValues: defaultValues,
-  });
+  }) as UseFormReturn<T>;
 
-  const handleSubmit = async (data: T) => {
-    if (!onSubmit) return;
-    setIsLoading(true);
-    try {
-      const result = await onSubmit(data);
-      if (result.success) {
-        if (result.tokens) {
-          await TokenStorage.setTokens(
-            result.tokens.accessToken,
-            result.tokens.refreshToken
+  const handleSubmit = useCallback(
+    async (data: T) => {
+      if (!onSubmit) return;
+      try {
+        const result = await onSubmit(data);
+        if (result.success) {
+          if (result.tokens) {
+            await TokenStorage.setTokens(
+              result.tokens.accessToken,
+              result.tokens.refreshToken
+            );
+          }
+          if (result.user) {
+            await TokenStorage.setUser(result.user);
+          }
+
+          toast.success(
+            isSignIn
+              ? "Signed in successfully!"
+              : "Account created successfully!"
           );
-        }
-        if (result.user) {
-          await TokenStorage.setUser(result.user);
-        }
 
-        toast.success(
-          isSignIn ? "Signed in successfully!" : "Account created successfully!"
-        );
-
-        router.push("/"); // Redirect to home/dashboard
-        router.refresh();
-      } else {
-        toast.error(result.error || "Authentication failed");
+          // Force a full page reload to ensure cookies are properly set
+          window.location.href = "/";
+        } else {
+          toast.error(result.error || "Authentication failed");
+        }
+      } catch {
+        toast.error("An error occurred. Please try again.");
       }
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [onSubmit, isSignIn]
+  );
 
   return (
     <div
@@ -96,121 +94,65 @@ const AuthForm = <T extends FieldValues>({
         isSignIn ? "space-y-4" : "space-y-8"
       )}
     >
-      <form
-        id="auth-form"
-        className=""
-        onSubmit={form.handleSubmit(handleSubmit)}
-      >
-        <FieldGroup className="gap-4">
+      <Form {...form}>
+        <form
+          id="auth-form"
+          className="space-y-4"
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
           {!isSignIn && (
-            <Controller
-              name={"fullName" as Path<T>}
+            <FormField
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel className="text-neutral-800" htmlFor={field.name}>
-                    Full name
-                  </FieldLabel>
+              name={"fullName" as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      className="h-auto w-full rounded-sm border-neutral-300 py-2.5"
+                      placeholder="John Doe"
+                      autoComplete="name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <FormField
+            control={form.control}
+            name={"email" as any}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
                   <Input
                     {...field}
                     className="h-auto w-full rounded-sm border-neutral-300 py-2.5"
-                    id="auth-form-fullname"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="John Doe"
-                    autoComplete="name"
+                    placeholder="example@mail.com"
+                    autoComplete="email"
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          )}
-          <Controller
-            name={"email" as Path<T>}
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel className="text-neutral-800" htmlFor={field.name}>
-                  Email
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id="auth-form-email"
-                  className="h-auto w-full rounded-sm border-neutral-300 py-2.5"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="example@mail.com"
-                  autoComplete="email"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
-          {!isSignIn && (
-            <Controller
-              name={"phone" as Path<T>}
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel className="text-neutral-800" htmlFor={field.name}>
-                    Phone number (optional)
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    className="h-auto w-full rounded-sm border-neutral-300 py-2.5"
-                    id="auth-form-phone"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="+1234567890"
-                    autoComplete="tel"
-                    type="tel"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          )}
-          {!isSignIn && (
-            <Controller
-              name={"role" as Path<T>}
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel className="text-neutral-800" htmlFor={field.name}>
-                    Role
-                  </FieldLabel>
-                  <RoleDropdown
-                    field={field}
-                    fieldState={fieldState}
-                    roles={Object.values(ROLES)}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          )}
-          <Controller
-            name={"password" as Path<T>}
+          <FormField
             control={form.control}
+            name={"password" as any}
             render={({ field, fieldState }) => (
-              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel className="text-neutral-800" htmlFor={field.name}>
-                  Password
-                </FieldLabel>
-                <PasswordInput field={field} fieldState={fieldState} />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <PasswordInput<T> field={field} fieldState={fieldState} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
-        </FieldGroup>
-      </form>
+        </form>
+      </Form>
       {isSignIn && (
         <p className="font-sans text-right">
           <Link
@@ -221,20 +163,16 @@ const AuthForm = <T extends FieldValues>({
           </Link>
         </p>
       )}
-      <Field className="gap-6" orientation="vertical">
+      <div className="flex flex-col gap-6">
         <Button
           className="h-auto rounded-sm py-4 hover:bg-blue-800"
           type="submit"
-          disabled={isLoading}
+          disabled={form.formState.isSubmitting}
           form="auth-form"
         >
-          {isLoading ? (
-            <LoaderCircle className="size-5 animate-spin" />
-          ) : isSignIn ? (
-            "Sign In"
-          ) : (
-            "Sign Up"
-          )}
+          <LoadingSwap isLoading={form.formState.isSubmitting}>
+            {isSignIn ? "Sign In" : "Sign Up"}
+          </LoadingSwap>
         </Button>
         <p className="font-sans mb-3 text-center text-neutral-500">
           {isSignIn ? "New to JobLinker? " : "Already have an account? "}
@@ -245,9 +183,9 @@ const AuthForm = <T extends FieldValues>({
             {isSignIn ? "Create an account" : "Sign in"}
           </Link>
         </p>
-      </Field>
+      </div>
     </div>
   );
 };
 
-export default AuthForm;
+export default React.memo(AuthForm) as typeof AuthForm;

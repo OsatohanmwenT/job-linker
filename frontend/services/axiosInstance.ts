@@ -1,7 +1,11 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { APP_CONFIG } from "@/config";
-import { refreshAccessToken } from "@/lib/auth/tokenRefresh";
+
 import * as TokenStorage from "@/lib/auth/tokenStorage";
+import {
+  getAccessTokenClient,
+  clearAllClient,
+} from "@/lib/auth/tokenStorage.client";
 
 export const createAxiosInstance = (
   clientUrl: string,
@@ -19,10 +23,24 @@ export const createAxiosInstance = (
   // Request interceptor - Add access token to requests
   instance.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
-      const accessToken = await TokenStorage.getAccessToken();
+      // Only try to get token on client-side (browser)
+      if (typeof window !== "undefined") {
+        const accessToken = getAccessTokenClient();
 
-      if (accessToken && config.headers) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+        if (accessToken && config.headers) {
+          config.headers.Authorization = `Bearer ${accessToken}`;
+        }
+      } else {
+        // On server-side, try to get token from server-side storage
+        try {
+          const accessToken = await TokenStorage.getAccessToken();
+          if (accessToken && config.headers) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+          }
+        } catch {
+          // Ignore errors on server-side (e.g., no cookies available)
+          console.log("No access token available on server-side");
+        }
       }
 
       return config;
@@ -32,7 +50,7 @@ export const createAxiosInstance = (
     }
   );
 
-  // Response interceptor - Handle 401 errors and refresh token
+  // Response interceptor - Handle errors
   instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
@@ -41,45 +59,30 @@ export const createAxiosInstance = (
         status: error.response?.status,
         message: error.message,
         hasResponse: !!error.response,
+        data: error.response?.data,
       });
 
-      const originalRequest = error.config as InternalAxiosRequestConfig & {
-        _retry?: boolean;
-      };
+      // Only redirect to login on actual authentication failures (401 Unauthorized)
+      if (error.response?.status === 401) {
+        const errorData = error.response?.data as any;
+        // Check if it's actually an auth error, not just a validation error
+        const isAuthError =
+          errorData?.detail?.toLowerCase().includes("not authenticated") ||
+          errorData?.detail?.toLowerCase().includes("token") ||
+          errorData?.detail?.toLowerCase().includes("unauthorized");
 
-      const isAuthEndpoint =
-        originalRequest.url?.includes("/login") ||
-        originalRequest.url?.includes("/register") ||
-        originalRequest.url?.includes("/refresh");
+        if (isAuthError && typeof window !== "undefined") {
+          // Clear tokens on client-side
+          clearAllClient();
 
-      if (
-        error.response?.status === 401 &&
-        !originalRequest._retry &&
-        !isAuthEndpoint
-      ) {
-        originalRequest._retry = true;
-
-        try {
-          const newAccessToken = await refreshAccessToken();
-
-          if (newAccessToken && originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-            return instance(originalRequest);
+          // Only redirect if not already on auth pages
+          if (
+            !window.location.pathname.includes("/login") &&
+            !window.location.pathname.includes("/register")
+          ) {
+            window.location.href = "/login";
           }
-        } catch (refreshError) {
-          await TokenStorage.clearAll();
-          if (typeof window !== "undefined") {
-            window.location.href = "/sign-in";
-          }
-          return Promise.reject(refreshError);
         }
-      } else if (error.response?.status === 401 && isAuthEndpoint) {
-        console.log("⚠️ 401 on auth endpoint, skipping refresh");
-      } else if (error.response?.status === 401) {
-        console.log("⚠️ 401 but already retried (_retry flag is true)");
-      } else {
-        console.log("⚠️ Not a 401 error, passing through");
       }
 
       return Promise.reject(error);
