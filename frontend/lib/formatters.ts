@@ -4,7 +4,7 @@ import {
   LocationRequirement,
   WageInterval,
 } from "@/types/jobListing";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -65,5 +65,7 @@ export function formatJobType(type: JobListingType): string {
 }
 
 export function formatRelativeTime(dateString: string): string {
-  return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  // Parse ISO string to ensure proper timezone handling
+  const date = parseISO(dateString);
+  return formatDistanceToNow(date, { addSuffix: true });
 }
