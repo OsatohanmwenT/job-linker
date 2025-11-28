@@ -20,6 +20,7 @@ from app.api.routes import (
 )
 
 # Import inngest_client
+from app.config import settings
 from app.core.background.inngest_client import inngest_client
 from app.core.background.jobs.applicant_ranking_job import rank_applicant_job
 from app.core.background.jobs.resume_job import parse_resume_job
@@ -35,10 +36,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="JobLinker API", lifespan=lifespan)
 
-# CORS middleware
+# CORS middleware - using settings from config
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend URL
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,10 +68,9 @@ inngest.fast_api.serve(
 
 @app.get("/")
 async def root():
-    return {"message": "AI Job Seeker API"}
+    return {"message": "JobLinker API", "version": settings.VERSION}
 
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
-    return {"status": "healthy"}
+    return {"status": "healthy", "version": settings.VERSION}
