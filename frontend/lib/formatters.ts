@@ -4,7 +4,7 @@ import {
   LocationRequirement,
   WageInterval,
 } from "@/types/jobListing";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatDistanceToNow, parseISO, isValid } from "date-fns";
 
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -64,8 +64,30 @@ export function formatJobType(type: JobListingType): string {
   }
 }
 
-export function formatRelativeTime(dateString: string): string {
-  // Parse ISO string to ensure proper timezone handling
-  const date = parseISO(dateString);
-  return formatDistanceToNow(date, { addSuffix: true });
+export function formatRelativeTime(dateString: string | null | undefined): string {
+  // Handle null, undefined, or empty strings
+  if (!dateString) {
+    return "Date not available";
+  }
+
+  try {
+    // Try parsing as ISO string first
+    let date = parseISO(dateString);
+    
+    // If parseISO fails, try creating a Date object directly
+    if (!isValid(date)) {
+      date = new Date(dateString);
+    }
+    
+    // Final validation check
+    if (!isValid(date)) {
+      console.error("Could not parse date:", dateString);
+      return "Recently posted";
+    }
+    
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (error) {
+    console.error("Error formatting date:", error, dateString);
+    return "Recently posted";
+  }
 }

@@ -75,8 +75,12 @@ const AuthForm = <T extends FieldValues>({
               : "Account created successfully!"
           );
 
-          // Force a full page reload to ensure cookies are properly set
-          window.location.href = "/";
+          // Get redirect URL from query params or default to dashboard
+          const params = new URLSearchParams(window.location.search);
+          const from = params.get("from") || "/dashboard";
+          
+          // Use window.location for full page reload to ensure auth state is fresh
+          window.location.href = from;
         } else {
           toast.error(result.error || "Authentication failed");
         }

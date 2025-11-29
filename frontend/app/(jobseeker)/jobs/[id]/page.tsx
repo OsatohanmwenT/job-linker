@@ -79,7 +79,7 @@ export default async function JobPage({ params }: JobPageProps) {
           className="mb-6 pl-0 hover:bg-transparent hover:text-primary"
         >
           <Link
-            href="/"
+            href="/jobs"
             className="flex items-center gap-2 text-muted-foreground"
           >
             <ArrowLeft className="w-4 h-4" />

@@ -6,7 +6,7 @@ import { Menu, X, Briefcase, Zap, Shield, TrendingUp } from "lucide-react";
 
 const navigation = [
   { name: "Find Jobs", href: "/jobs" },
-  { name: "For Employers", href: "/employer/jobs" },
+  { name: "For Employers", href: "/employer" },
   { name: "Pricing", href: "/pricing" },
   { name: "Dashboard", href: "/dashboard" },
 ];
