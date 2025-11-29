@@ -13,7 +13,7 @@ engine = create_engine(
     connect_args=connect_args,
     pool_pre_ping=True,  # Verify connections before using them
     pool_size=5,
-    max_overflow=10
+    max_overflow=10,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
