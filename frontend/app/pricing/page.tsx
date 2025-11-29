@@ -174,7 +174,7 @@ export default function PricingPage() {
             </p>
           </div>
           <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600 dark:text-gray-400">
-            Choose the perfect plan for your needs. Whether you're a job seeker
+            Choose the perfect plan for your needs. Whether you&apos;re a job seeker
             looking for your next role or an employer hiring top talent.
           </p>
           <div className="isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
