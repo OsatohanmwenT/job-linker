@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     EMAIL_FROM_NAME: str = "JobLinker"
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173", "https://job-linker-theta.vercel.app"]
 
     # Server
     HOST: str = "0.0.0.0"
