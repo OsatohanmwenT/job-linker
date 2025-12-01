@@ -1,7 +1,6 @@
 # app/config.py
 from typing import Optional
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,20 +33,6 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     EMAIL_FROM: str = "noreply@joblinker.com"
     EMAIL_FROM_NAME: str = "JobLinker"
-
-    # CORS - accepts both string (comma-separated) and list
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://job-linker-theta.vercel.app",
-    ]
-
-    @field_validator("CORS_ORIGINS", mode="before")
-    def parse_cors_origins(cls, v):
-        if isinstance(v, str):
-            # Handle comma-separated string from env var
-            return [origin.strip() for origin in v.split(",")]
-        return v
 
     # Server
     HOST: str = "0.0.0.0"
