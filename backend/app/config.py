@@ -34,11 +34,10 @@ class Settings(BaseSettings):
     EMAIL_FROM: str = "noreply@joblinker.com"
     EMAIL_FROM_NAME: str = "JobLinker"
 
-    # CORS
+    # CORS - accepts both string (comma-separated) and list
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173", "https://job-linker-theta.vercel.app"]
 
     @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
     def parse_cors_origins(cls, v):
         if isinstance(v, str):
             # Handle comma-separated string from env var
