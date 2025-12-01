@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     # App
     PROJECT_NAME: str = "JobLinker API"
@@ -35,7 +36,11 @@ class Settings(BaseSettings):
     EMAIL_FROM_NAME: str = "JobLinker"
 
     # CORS - accepts both string (comma-separated) and list
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173", "https://job-linker-theta.vercel.app"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://job-linker-theta.vercel.app",
+    ]
 
     @field_validator("CORS_ORIGINS", mode="before")
     def parse_cors_origins(cls, v):
@@ -53,4 +58,5 @@ class Settings(BaseSettings):
     )
 
 
+settings = Settings()
 settings = Settings()
