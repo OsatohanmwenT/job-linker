@@ -16,17 +16,6 @@ export const loginUser = async ({
 }> => {
   try {
     const response = await authService.login({ email, password });
-    if (response.accessToken) {
-      await TokenStorage.setAccessToken(response.accessToken);
-    }
-
-    if (response.refreshToken) {
-      await TokenStorage.setRefreshToken(response.refreshToken);
-    }
-
-    if (response.user) {
-      await TokenStorage.setUser(response.user);
-    }
 
     return {
       success: true,

@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import AuthForm from "@/components/auth/AuthForm";
 import { LoginSchema, LoginSchemaType } from "@/lib/schemas/auth";
 import { loginUser } from "@/lib/actions/auth";
+import * as TokenStorage from "@/lib/auth/tokenStorage";
 
 const defaultValues = { email: "", password: "" };
 
@@ -11,11 +12,19 @@ export default function LoginPage() {
   const handleLogin = useCallback(async (data: LoginSchemaType) => {
     const result = await loginUser(data);
 
+
     if (result.success) {
-      return result;
-    } else {
-      return result;
+    if (result.tokens) {
+      await TokenStorage.setAccessToken(result.tokens.accessToken);
+      if (result.tokens.refreshToken) {
+        await TokenStorage.setRefreshToken(result.tokens.refreshToken);
+      }
     }
+    if (result.user) {
+      await TokenStorage.setUser(result.user);
+    }
+  }
+  return result;
   }, []);
 
   return (
