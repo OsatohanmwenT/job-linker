@@ -9,7 +9,7 @@ import { BaseService } from "./baseService";
 
 class AuthService extends BaseService {
   constructor() {
-    super("api/auth");
+    super("auth");
   }
 
   async login(data: BackendLoginRequest): Promise<AuthResponseData> {
