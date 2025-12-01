@@ -37,11 +37,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="JobLinker API", lifespan=lifespan)
 
-# CORS middleware - using settings from config
+# CORS middleware - allow all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,  # Must be False when allow_origins is ["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
