@@ -7,12 +7,27 @@ import {
 } from "@/types/auth";
 
 class AuthService {
+  private getBaseUrl(): string {
+    // Check if running on server-side
+    if (typeof window === "undefined") {
+      // Server-side: use VERCEL_URL or localhost
+      return process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000";
+    }
+    // Client-side: use relative URLs (empty string means same origin)
+    return "";
+  }
+
   private async handleRequest<TData>(
     url: string,
     options: RequestInit
   ): Promise<TData> {
     try {
-      const response = await fetch(url, options);
+      const baseUrl = this.getBaseUrl();
+      const fullUrl = `${baseUrl}${url}`;
+      
+      const response = await fetch(fullUrl, options);
       const data = await response.json();
 
       if (!response.ok) {

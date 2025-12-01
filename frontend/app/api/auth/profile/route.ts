@@ -9,10 +9,7 @@ export async function GET() {
     const accessToken = cookieStore.get("accessToken")?.value;
 
     if (!accessToken) {
-      return NextResponse.json(
-        { detail: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
     }
 
     const response = await fetch(`${API_URL}/auth/profile`, {
