@@ -78,7 +78,7 @@ const AuthForm = <T extends FieldValues>({
           // Get redirect URL from query params or default to dashboard
           const params = new URLSearchParams(window.location.search);
           const from = params.get("from") || "/dashboard";
-          
+
           // Use window.location for full page reload to ensure auth state is fresh
           window.location.href = from;
         } else {
