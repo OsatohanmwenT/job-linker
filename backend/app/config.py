@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Optional[str] = None
 
     # Inngest
+    INNGEST_BASE_URL: Optional[str] = None
     INNGEST_EVENT_KEY: Optional[str] = None
     INNGEST_SIGNING_KEY: Optional[str] = None
 
@@ -43,5 +44,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
 settings = Settings()

@@ -12,7 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, LayoutDashboard, Briefcase } from "lucide-react";
+import {
+  User,
+  LogOut,
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+} from "lucide-react";
 
 export function JobSeekerHeader() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -34,12 +40,20 @@ export function JobSeekerHeader() {
               Browse Jobs
             </Link>
             {isAuthenticated && (
-              <Link
-                href="/dashboard"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/dashboard"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/resume"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Resume
+                </Link>
+              </>
             )}
           </nav>
         </div>
@@ -85,6 +99,12 @@ export function JobSeekerHeader() {
                     <Link href="/jobs">
                       <Briefcase className="mr-2 h-4 w-4" />
                       Browse Jobs
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/resume">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Resume
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+import inngest  # ← IMPORTANT: Add this import!
 
 from app.api.deps import get_current_active_user
 from app.core.background.inngest_client import inngest_client
@@ -14,6 +15,24 @@ from app.models.user import User
 from app.schemas.resume import ResumeResponse
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
+
+
+async def trigger_resume_parsing(candidate_id: int, file_content: bytes, file_type: str):
+    """Helper function to trigger resume parsing job"""
+    try:
+        await inngest_client.send(
+            inngest.Event(
+                name="app/resume.uploaded",
+                data={
+                    "candidate_id": candidate_id,
+                    "file_content": base64.b64encode(file_content).decode("utf-8"),
+                    "file_type": file_type,
+                },
+            )
+        )
+    except Exception as e:
+        # Log error but don't fail the upload
+        print(f"Error triggering resume parsing job: {e}")
 
 
 @router.post(
@@ -76,16 +95,7 @@ async def upload_resume(
         db.refresh(existing_resume)
 
         # Trigger background job to parse resume with AI
-        await inngest_client.send(
-            {
-                "name": "app/resume.uploaded",
-                "data": {
-                    "candidate_id": candidate.id,
-                    "file_content": base64.b64encode(file_content).decode("utf-8"),
-                    "file_type": file_type,
-                },
-            }
-        )
+        await trigger_resume_parsing(candidate.id, file_content, file_type)
 
         return existing_resume
 
@@ -103,16 +113,7 @@ async def upload_resume(
     db.refresh(new_resume)
 
     # Trigger background job to parse resume with AI
-    await inngest_client.send(
-        {
-            "name": "app/resume.uploaded",
-            "data": {
-                "candidate_id": candidate.id,
-                "file_content": base64.b64encode(file_content).decode("utf-8"),
-                "file_type": file_type,
-            },
-        }
-    )
+    await trigger_resume_parsing(candidate.id, file_content, file_type)
 
     return new_resume
 
